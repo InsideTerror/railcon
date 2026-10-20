@@ -44,7 +44,7 @@ export async function dispatcherRoutes(app: FastifyInstance) {
 
     let senderId: string | undefined;
     if (token) {
-      const { verifyToken } = await import('../lib/auth');
+      const { verifyToken } = await import('../lib/auth.js');
       const payload = await verifyToken(token);
       if (payload) senderId = payload.sub;
     }

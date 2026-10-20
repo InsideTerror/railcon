@@ -57,7 +57,7 @@ export async function gtfsRoutes(app: FastifyInstance) {
       const routeTrips = trips.filter((t: any) => t.route_id === route.route_id);
 
       for (const trip of routeTrips) {
-        const tripStopTimes = stopTimes
+        const tripStopTimes: any[] = stopTimes
           .filter((st: any) => st.trip_id === trip.trip_id)
           .sort((a: any, b: any) => parseInt(a.stop_sequence) - parseInt(b.stop_sequence));
 

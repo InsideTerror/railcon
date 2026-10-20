@@ -44,7 +44,7 @@ export async function messageRoutes(app: FastifyInstance) {
 
     let senderId: string | undefined;
     if (token) {
-      const { verifyToken } = await import('../lib/auth');
+      const { verifyToken } = await import('../lib/auth.js');
       const payload = await verifyToken(token);
       if (payload) senderId = payload.sub;
     }
@@ -54,10 +54,8 @@ export async function messageRoutes(app: FastifyInstance) {
       include: { sender: { select: { id: true, name: true, forteId: true } } },
     });
 
-    const socket = sendToClient(receiverClientId, 'new-message', message);
-    if (!socket) {
-      broadcastToRole('DISPATCHER', 'message-queued', { message, receiverClientId });
-    }
+    sendToClient(receiverClientId, 'new-message', message);
+    broadcastToRole('DISPATCHER', 'message-queued', { message, receiverClientId });
 
     return { message };
   });

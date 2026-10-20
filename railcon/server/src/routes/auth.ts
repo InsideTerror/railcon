@@ -35,7 +35,7 @@ export async function authRoutes(app: FastifyInstance) {
       return reply.code(401).send({ error: 'Unauthorized' });
     }
 
-    const { verifyToken } = await import('../lib/auth');
+    const { verifyToken } = await import('../lib/auth.js');
     const payload = await verifyToken(token);
     if (!payload) {
       return reply.code(401).send({ error: 'Invalid token' });
