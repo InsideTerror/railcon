@@ -1,0 +1,11 @@
+# 1. Configure environment
+cp server/.env.example server/.env  # edit DATABASE_URL, JWT_SECRET
+
+# 2. Install & setup
+npm install
+npm run db:generate
+npm run db:migrate
+npm run db:seed
+
+# 3. Start development
+npm run dev
