@@ -57,7 +57,7 @@ export function DriverOBU() {
 
     const unsubTerminate = api.onWSMessage<{ clientId: string }>('session-terminated', (data) => {
       if (data.clientId === clientId && session) {
-        setSession({ ...session, status: 'NON_ACTIVE', driverId: undefined, timetableId: undefined, currentStopIndex: 0, delayMinutes: 0 });
+        setSession({ ...session, status: 'NON_ACTIVE', driverId: null, timetableId: null, currentStopIndex: 0, delayMinutes: 0 });
       }
     });
 

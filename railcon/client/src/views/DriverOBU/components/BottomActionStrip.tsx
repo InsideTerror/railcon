@@ -6,7 +6,7 @@ interface BottomActionStripProps {
   session: any;
 }
 
-export function BottomActionStrip({ session }: BottomActionStripProps) {
+export function BottomActionStrip(_props: BottomActionStripProps) {
   const [doorOpen, setDoorOpen] = useState(false);
   const [panicPressed, setPanicPressed] = useState(false);
   const [panicConfirm, setPanicConfirm] = useState(false);

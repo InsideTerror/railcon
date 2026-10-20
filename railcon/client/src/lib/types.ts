@@ -58,6 +58,7 @@ export interface ActiveSession {
   currentStopIndex: number;
   delayMinutes: number;
   status: 'ACTIVE' | 'IDLE' | 'NON_ACTIVE';
+  doorOpen?: boolean;
   createdAt: string;
   updatedAt: string;
   driver?: User | null;
