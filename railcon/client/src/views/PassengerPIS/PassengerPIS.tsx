@@ -173,7 +173,7 @@ export function PassengerPIS() {
                 <span className="text-sm">Doors Closing</span>
                 <span className="text-xs">TTS Trigger</span>
               </button>
-              <button onClick={announceTerminal} disabled={speaking || nextStop} className="btn-secondary h-20 flex flex-col items-center gap-2">
+              <button onClick={announceTerminal} disabled={speaking || !!nextStop} className="btn-secondary h-20 flex flex-col items-center gap-2">
                 <Train className="w-8 h-8" />
                 <span className="text-sm">Terminal</span>
                 <span className="text-xs">All Alight</span>
