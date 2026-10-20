@@ -38,7 +38,7 @@ export async function gtfsRoutes(app: FastifyInstance) {
 
     const stationMap = new Map<string, string>();
 
-    for (const stop of stops) {
+    for (const stop of (stops as any[])) {
       const station = await prisma.station.upsert({
         where: { code: stop.stop_id },
         update: { name: stop.stop_name },
@@ -47,7 +47,7 @@ export async function gtfsRoutes(app: FastifyInstance) {
       stationMap.set(stop.stop_id, station.id);
     }
 
-    for (const route of routes) {
+    for (const route of (routes as any[])) {
       const dbRoute = await prisma.route.upsert({
         where: { id: route.route_id },
         update: { name: route.route_long_name || route.route_short_name, description: route.route_desc },
@@ -56,7 +56,7 @@ export async function gtfsRoutes(app: FastifyInstance) {
 
       const routeTrips = trips.filter((t: any) => t.route_id === route.route_id);
 
-      for (const trip of routeTrips) {
+      for (const trip of (routeTrips as any[])) {
         const tripStopTimes: any[] = stopTimes
           .filter((st: any) => st.trip_id === trip.trip_id)
           .sort((a: any, b: any) => parseInt(a.stop_sequence) - parseInt(b.stop_sequence));
@@ -98,7 +98,7 @@ export async function gtfsRoutes(app: FastifyInstance) {
     const content = fs.readFileSync(csvPath, 'utf-8');
     const records = parse(content, { columns: true, skip_empty_lines: true });
 
-    for (const record of records) {
+    for (const record of (records as any[])) {
       const { RouteID, RunNumber, StationName, ScheduledArrival, ScheduledDeparture, SequenceIndex } = record;
 
       let station = await prisma.station.findFirst({ where: { name: StationName } });
