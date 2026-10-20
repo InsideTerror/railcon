@@ -1,16 +1,16 @@
-import { FastifyInstance } from 'fastify';
+import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { z } from 'zod';
 import prisma from '../lib/prisma';
 
 export async function stationRoutes(app: FastifyInstance) {
-  app.get('/stations', async () => {
+  app.get('/stations', async (_request: FastifyRequest, _reply: FastifyReply) => {
     const stations = await prisma.station.findMany({
       orderBy: { name: 'asc' },
     });
     return { stations };
   });
 
-  app.get('/stations/:id', async (request, reply) => {
+  app.get('/stations/:id', async (request: FastifyRequest, reply: FastifyReply) => {
     const { id } = request.params as { id: string };
 
     const station = await prisma.station.findUnique({
@@ -28,7 +28,7 @@ export async function stationRoutes(app: FastifyInstance) {
     return { station };
   });
 
-  app.post('/stations', async (request, reply) => {
+  app.post('/stations', async (request: FastifyRequest, reply: FastifyReply) => {
     const schema = z.object({
       name: z.string().min(1),
       code: z.string().min(1).max(10),
@@ -43,7 +43,7 @@ export async function stationRoutes(app: FastifyInstance) {
     return { station };
   });
 
-  app.put('/stations/:id', async (request, reply) => {
+  app.put('/stations/:id', async (request: FastifyRequest, reply: FastifyReply) => {
     const { id } = request.params as { id: string };
     const schema = z.object({
       name: z.string().optional(),
@@ -60,7 +60,7 @@ export async function stationRoutes(app: FastifyInstance) {
     return { station };
   });
 
-  app.delete('/stations/:id', async (request, reply) => {
+  app.delete('/stations/:id', async (request: FastifyRequest, reply: FastifyReply) => {
     const { id } = request.params as { id: string };
     await prisma.station.delete({ where: { id } });
     return { success: true };

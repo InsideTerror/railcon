@@ -20,7 +20,7 @@ export function initializeWebSocket(httpServer: HTTPServer) {
     path: '/ws',
   });
 
-  io.use(async (socket: AuthenticatedSocket, next) => {
+  io.use(async (socket: AuthenticatedSocket, next: (err?: Error) => void) => {
     const token = socket.handshake.auth.token || socket.handshake.query.token;
     if (typeof token !== 'string') {
       return next(new Error('Authentication required'));

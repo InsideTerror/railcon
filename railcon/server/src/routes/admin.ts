@@ -1,10 +1,10 @@
-import { FastifyInstance } from 'fastify';
+import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { z } from 'zod';
 import prisma from '../lib/prisma';
 import bcrypt from 'bcryptjs';
 
 export async function adminRoutes(app: FastifyInstance) {
-  app.get('/admin/users', async () => {
+  app.get('/admin/users', async (_request: FastifyRequest, _reply: FastifyReply) => {
     const users = await prisma.user.findMany({
       select: { id: true, forteId: true, name: true, role: true, createdAt: true },
       orderBy: { createdAt: 'desc' },
@@ -12,7 +12,7 @@ export async function adminRoutes(app: FastifyInstance) {
     return { users };
   });
 
-  app.post('/admin/users', async (request, reply) => {
+  app.post('/admin/users', async (request: FastifyRequest, reply: FastifyReply) => {
     const schema = z.object({
       pin: z.string().length(6),
       forteId: z.string().min(1),
@@ -37,7 +37,7 @@ export async function adminRoutes(app: FastifyInstance) {
     return { user };
   });
 
-  app.put('/admin/users/:id', async (request, reply) => {
+  app.put('/admin/users/:id', async (request: FastifyRequest, reply: FastifyReply) => {
     const { id } = request.params as { id: string };
     const schema = z.object({
       name: z.string().optional(),
@@ -61,7 +61,7 @@ export async function adminRoutes(app: FastifyInstance) {
     return { user };
   });
 
-  app.delete('/admin/users/:id', async (request, reply) => {
+  app.delete('/admin/users/:id', async (request: FastifyRequest, reply: FastifyReply) => {
     const { id } = request.params as { id: string };
     await prisma.user.delete({ where: { id } });
     return { success: true };

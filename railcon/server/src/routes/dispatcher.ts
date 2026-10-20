@@ -1,10 +1,10 @@
-import { FastifyInstance } from 'fastify';
+import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { z } from 'zod';
 import prisma from '../lib/prisma';
 import { broadcastToRole, sendToClient } from '../lib/websocket';
 
 export async function dispatcherRoutes(app: FastifyInstance) {
-  app.get('/dispatcher/fleet', async () => {
+  app.get('/dispatcher/fleet', async (_request: FastifyRequest, _reply: FastifyReply) => {
     const sessions = await prisma.activeSession.findMany({
       include: {
         driver: { select: { id: true, name: true, forteId: true, role: true } },
@@ -21,14 +21,14 @@ export async function dispatcherRoutes(app: FastifyInstance) {
       orderBy: { createdAt: 'desc' },
     });
 
-    const active = sessions.filter(s => s.status === 'ACTIVE');
-    const idle = sessions.filter(s => s.status === 'IDLE');
-    const nonActive = sessions.filter(s => s.status === 'NON_ACTIVE');
+    const active = sessions.filter((s: any) => s.status === 'ACTIVE');
+    const idle = sessions.filter((s: any) => s.status === 'IDLE');
+    const nonActive = sessions.filter((s: any) => s.status === 'NON_ACTIVE');
 
     return { active, idle, nonActive, total: sessions.length };
   });
 
-  app.post('/dispatcher/broadcast', async (request, reply) => {
+  app.post('/dispatcher/broadcast', async (request: FastifyRequest, reply: FastifyReply) => {
     const schema = z.object({
       clientIds: z.array(z.string()).optional(),
       role: z.enum(['DRIVER', 'DISPATCHER', 'SYSADMIN']).optional(),
@@ -67,7 +67,7 @@ export async function dispatcherRoutes(app: FastifyInstance) {
     return { success: true, message };
   });
 
-  app.post('/dispatcher/truncate-stops', async (request, reply) => {
+  app.post('/dispatcher/truncate-stops', async (request: FastifyRequest, reply: FastifyReply) => {
     const schema = z.object({
       clientId: z.string().min(1),
       newStopIndex: z.number().int().min(0),
@@ -99,7 +99,7 @@ export async function dispatcherRoutes(app: FastifyInstance) {
     return { success: true };
   });
 
-  app.post('/dispatcher/schedule-override', async (request, reply) => {
+  app.post('/dispatcher/schedule-override', async (request: FastifyRequest, reply: FastifyReply) => {
     const schema = z.object({
       clientId: z.string().min(1),
       delayMinutes: z.number().int(),
@@ -118,7 +118,7 @@ export async function dispatcherRoutes(app: FastifyInstance) {
     return { success: true };
   });
 
-  app.post('/dispatcher/relief-run', async (request, reply) => {
+  app.post('/dispatcher/relief-run', async (request: FastifyRequest, reply: FastifyReply) => {
     const schema = z.object({
       routeId: z.string().min(1),
       runNumber: z.string().min(1),
@@ -143,7 +143,7 @@ export async function dispatcherRoutes(app: FastifyInstance) {
         endTime: new Date(endTime),
         direction,
         stops: {
-          create: stops.map(s => ({
+          create: stops.map((s: any) => ({
             stationId: s.stationId,
             stopSequenceIndex: s.stopSequenceIndex,
             scheduledArrival: s.scheduledArrival ? new Date(s.scheduledArrival) : null,
@@ -159,7 +159,7 @@ export async function dispatcherRoutes(app: FastifyInstance) {
     return { timetable };
   });
 
-  app.post('/dispatcher/terminate-session', async (request, reply) => {
+  app.post('/dispatcher/terminate-session', async (request: FastifyRequest, reply: FastifyReply) => {
     const schema = z.object({
       clientId: z.string().min(1),
     });

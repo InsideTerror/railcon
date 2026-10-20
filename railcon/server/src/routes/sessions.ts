@@ -1,10 +1,10 @@
-import { FastifyInstance } from 'fastify';
+import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { z } from 'zod';
 import prisma from '../lib/prisma';
 import { getConnectedClients, sendToClient, broadcastToRole } from '../lib/websocket';
 
 export async function sessionRoutes(app: FastifyInstance) {
-  app.get('/sessions', async () => {
+  app.get('/sessions', async (_request: FastifyRequest, _reply: FastifyReply) => {
     const sessions = await prisma.activeSession.findMany({
       include: {
         driver: { select: { id: true, name: true, forteId: true, role: true } },
@@ -24,7 +24,7 @@ export async function sessionRoutes(app: FastifyInstance) {
     return { sessions };
   });
 
-  app.get('/sessions/:clientId', async (request, reply) => {
+  app.get('/sessions/:clientId', async (request: FastifyRequest, reply: FastifyReply) => {
     const { clientId } = request.params as { clientId: string };
 
     const session = await prisma.activeSession.findUnique({
@@ -50,7 +50,7 @@ export async function sessionRoutes(app: FastifyInstance) {
     return { session };
   });
 
-  app.patch('/sessions/:clientId', async (request, reply) => {
+  app.patch('/sessions/:clientId', async (request: FastifyRequest, reply: FastifyReply) => {
     const { clientId } = request.params as { clientId: string };
     const schema = z.object({
       driverId: z.string().optional(),
@@ -81,7 +81,7 @@ export async function sessionRoutes(app: FastifyInstance) {
     return { session };
   });
 
-  app.delete('/sessions/:clientId', async (request, reply) => {
+  app.delete('/sessions/:clientId', async (request: FastifyRequest, reply: FastifyReply) => {
     const { clientId } = request.params as { clientId: string };
 
     await prisma.activeSession.update({
@@ -99,7 +99,7 @@ export async function sessionRoutes(app: FastifyInstance) {
     return { success: true };
   });
 
-  app.post('/sessions/:clientId/advance-stop', async (request, reply) => {
+  app.post('/sessions/:clientId/advance-stop', async (request: FastifyRequest, reply: FastifyReply) => {
     const { clientId } = request.params as { clientId: string };
 
     const session = await prisma.activeSession.findUnique({
@@ -133,7 +133,7 @@ export async function sessionRoutes(app: FastifyInstance) {
     return { session: updated };
   });
 
-  app.post('/sessions/:clientId/door-toggle', async (request, reply) => {
+  app.post('/sessions/:clientId/door-toggle', async (request: FastifyRequest, reply: FastifyReply) => {
     const { clientId } = request.params as { clientId: string };
     const schema = z.object({ doorOpen: z.boolean() });
     const { doorOpen } = schema.parse(request.body);

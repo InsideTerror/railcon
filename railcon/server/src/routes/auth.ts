@@ -1,4 +1,4 @@
-import { FastifyInstance } from 'fastify';
+import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { z } from 'zod';
 import { authenticateDriver, createToken, JWTPayload } from '../lib/auth';
 import prisma from '../lib/prisma';
@@ -9,7 +9,7 @@ const loginSchema = z.object({
 });
 
 export async function authRoutes(app: FastifyInstance) {
-  app.post('/auth/login', async (request, reply) => {
+  app.post('/auth/login', async (request: FastifyRequest, reply: FastifyReply) => {
     const { pin, forteId } = loginSchema.parse(request.body);
 
     const user = await authenticateDriver(pin, forteId);
@@ -27,7 +27,7 @@ export async function authRoutes(app: FastifyInstance) {
     return { token, user: { id: user.id, name: user.name, forteId: user.forteId, role: user.role } };
   });
 
-  app.get('/auth/me', async (request, reply) => {
+  app.get('/auth/me', async (request: FastifyRequest, reply: FastifyReply) => {
     const authHeader = request.headers.authorization;
     const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
 
@@ -53,7 +53,7 @@ export async function authRoutes(app: FastifyInstance) {
     return { user };
   });
 
-  app.post('/auth/register-client', async (request, reply) => {
+  app.post('/auth/register-client', async (request: FastifyRequest, reply: FastifyReply) => {
     const schema = z.object({
       clientId: z.string().min(1),
       driverId: z.string().optional(),

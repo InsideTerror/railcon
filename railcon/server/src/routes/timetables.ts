@@ -1,9 +1,9 @@
-import { FastifyInstance } from 'fastify';
+import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { z } from 'zod';
 import prisma from '../lib/prisma';
 
 export async function timetableRoutes(app: FastifyInstance) {
-  app.get('/timetables', async (request) => {
+  app.get('/timetables', async (request: FastifyRequest, _reply: FastifyReply) => {
     const { routeId, direction } = request.query as { routeId?: string; direction?: string };
 
     const where: any = {};
@@ -25,7 +25,7 @@ export async function timetableRoutes(app: FastifyInstance) {
     return { timetables };
   });
 
-  app.get('/timetables/:id', async (request, reply) => {
+  app.get('/timetables/:id', async (request: FastifyRequest, reply: FastifyReply) => {
     const { id } = request.params as { id: string };
 
     const timetable = await prisma.timetable.findUnique({
@@ -46,7 +46,7 @@ export async function timetableRoutes(app: FastifyInstance) {
     return { timetable };
   });
 
-  app.post('/timetables', async (request, reply) => {
+  app.post('/timetables', async (request: FastifyRequest, reply: FastifyReply) => {
     const schema = z.object({
       routeId: z.string().min(1),
       runNumber: z.string().min(1),
@@ -71,7 +71,7 @@ export async function timetableRoutes(app: FastifyInstance) {
         endTime: new Date(endTime),
         direction,
         stops: {
-          create: stops.map(s => ({
+          create: stops.map((s: any) => ({
             stationId: s.stationId,
             stopSequenceIndex: s.stopSequenceIndex,
             scheduledArrival: s.scheduledArrival ? new Date(s.scheduledArrival) : null,
@@ -85,7 +85,7 @@ export async function timetableRoutes(app: FastifyInstance) {
     return { timetable };
   });
 
-  app.put('/timetables/:id', async (request, reply) => {
+  app.put('/timetables/:id', async (request: FastifyRequest, reply: FastifyReply) => {
     const { id } = request.params as { id: string };
     const schema = z.object({
       runNumber: z.string().optional(),
@@ -111,7 +111,7 @@ export async function timetableRoutes(app: FastifyInstance) {
     return { timetable };
   });
 
-  app.delete('/timetables/:id', async (request, reply) => {
+  app.delete('/timetables/:id', async (request: FastifyRequest, reply: FastifyReply) => {
     const { id } = request.params as { id: string };
     await prisma.timetable.delete({ where: { id } });
     return { success: true };

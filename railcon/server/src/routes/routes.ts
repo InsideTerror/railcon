@@ -1,9 +1,9 @@
-import { FastifyInstance } from 'fastify';
+import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { z } from 'zod';
 import prisma from '../lib/prisma';
 
 export async function routeRoutes(app: FastifyInstance) {
-  app.get('/routes', async () => {
+  app.get('/routes', async (_request: FastifyRequest, _reply: FastifyReply) => {
     const routes = await prisma.route.findMany({
       include: {
         stops: {
@@ -24,7 +24,7 @@ export async function routeRoutes(app: FastifyInstance) {
     return { routes };
   });
 
-  app.get('/routes/:id', async (request, reply) => {
+  app.get('/routes/:id', async (request: FastifyRequest, reply: FastifyReply) => {
     const { id } = request.params as { id: string };
 
     const route = await prisma.route.findUnique({
@@ -52,7 +52,7 @@ export async function routeRoutes(app: FastifyInstance) {
     return { route };
   });
 
-  app.post('/routes', async (request, reply) => {
+  app.post('/routes', async (request: FastifyRequest, reply: FastifyReply) => {
     const schema = z.object({
       id: z.string().min(1),
       name: z.string().min(1),
@@ -71,7 +71,7 @@ export async function routeRoutes(app: FastifyInstance) {
         name,
         description,
         stops: stops ? {
-          create: stops.map(s => ({
+          create: stops.map((s: any) => ({
             stationId: s.stationId,
             stopSequenceIndex: s.stopSequenceIndex,
           })),
@@ -83,7 +83,7 @@ export async function routeRoutes(app: FastifyInstance) {
     return { route };
   });
 
-  app.put('/routes/:id', async (request, reply) => {
+  app.put('/routes/:id', async (request: FastifyRequest, reply: FastifyReply) => {
     const { id } = request.params as { id: string };
     const schema = z.object({
       name: z.string().optional(),
@@ -101,7 +101,7 @@ export async function routeRoutes(app: FastifyInstance) {
     return { route };
   });
 
-  app.delete('/routes/:id', async (request, reply) => {
+  app.delete('/routes/:id', async (request: FastifyRequest, reply: FastifyReply) => {
     const { id } = request.params as { id: string };
     await prisma.route.delete({ where: { id } });
     return { success: true };

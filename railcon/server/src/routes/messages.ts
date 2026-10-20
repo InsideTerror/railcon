@@ -1,10 +1,10 @@
-import { FastifyInstance } from 'fastify';
+import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { z } from 'zod';
 import prisma from '../lib/prisma';
-import { sendToClient, broadcastToRole } from '../lib/websocket';
+import { sendToClient, broadcastToRole, getConnectedClients } from '../lib/websocket';
 
 export async function messageRoutes(app: FastifyInstance) {
-  app.get('/messages', async (request) => {
+  app.get('/messages', async (request: FastifyRequest, _reply: FastifyReply) => {
     const { clientId, type, limit = '50', offset = '0' } = request.query as {
       clientId?: string;
       type?: string;
@@ -30,7 +30,7 @@ export async function messageRoutes(app: FastifyInstance) {
     return { messages, total };
   });
 
-  app.post('/messages', async (request, reply) => {
+  app.post('/messages', async (request: FastifyRequest, reply: FastifyReply) => {
     const schema = z.object({
       receiverClientId: z.string().min(1),
       content: z.string().min(1),
@@ -54,13 +54,16 @@ export async function messageRoutes(app: FastifyInstance) {
       include: { sender: { select: { id: true, name: true, forteId: true } } },
     });
 
-    sendToClient(receiverClientId, 'new-message', message);
+    const socket = getConnectedClients().get(receiverClientId);
+    if (socket) {
+      socket.emit('new-message', message);
+    }
     broadcastToRole('DISPATCHER', 'message-queued', { message, receiverClientId });
 
     return { message };
   });
 
-  app.patch('/messages/:id/acknowledge', async (request, reply) => {
+  app.patch('/messages/:id/acknowledge', async (request: FastifyRequest, reply: FastifyReply) => {
     const { id } = request.params as { id: string };
 
     const message = await prisma.message.update({
@@ -71,7 +74,7 @@ export async function messageRoutes(app: FastifyInstance) {
     return { message };
   });
 
-  app.get('/canned-options', async () => {
+  app.get('/canned-options', async (_request: FastifyRequest, _reply: FastifyReply) => {
     const options = await prisma.cannedOption.findMany({
       orderBy: [{ category: 'asc' }, { displayOrder: 'asc' }],
     });

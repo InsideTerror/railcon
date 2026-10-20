@@ -1,4 +1,4 @@
-import { FastifyInstance } from 'fastify';
+import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { z } from 'zod';
 import prisma from '../lib/prisma';
 import * as fs from 'fs';
@@ -6,7 +6,7 @@ import * as path from 'path';
 import { parse } from 'csv-parse/sync';
 
 export async function gtfsRoutes(app: FastifyInstance) {
-  app.post('/gtfs/import', async (request, reply) => {
+  app.post('/gtfs/import', async (request: FastifyRequest, reply: FastifyReply) => {
     const schema = z.object({
       gtfsPath: z.string().min(1),
     });
@@ -84,7 +84,7 @@ export async function gtfsRoutes(app: FastifyInstance) {
     return { success: true, message: 'GTFS import completed' };
   });
 
-  app.post('/csv/import', async (request, reply) => {
+  app.post('/csv/import', async (request: FastifyRequest, reply: FastifyReply) => {
     const schema = z.object({
       csvPath: z.string().min(1),
     });
