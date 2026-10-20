@@ -1,5 +1,6 @@
 // RailCon API Client - REST + WebSocket communication layer
 
+import { io, Socket } from 'socket.io-client';
 import type {
   User,
   Station,
@@ -31,7 +32,7 @@ const WS_BASE = (import.meta as any).env?.VITE_WS_BASE || '/ws';
 
 class ApiClient {
   private token: string | null = null;
-  private ws: WebSocket | null = null;
+  private ws: Socket | null = null;
   private wsReconnectAttempts = 0;
   private wsMaxReconnectAttempts = 5;
   private wsReconnectDelay = 1000;
@@ -379,36 +380,35 @@ class ApiClient {
   connectWebSocket(clientId: string): Promise<void> {
     this.clientId = clientId;
     return new Promise((resolve, reject) => {
-      const wsUrl = `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}${WS_BASE}`;
-      this.ws = new WebSocket(wsUrl);
+      const serverUrl = `${window.location.protocol === 'https:' ? 'https:' : 'http:'}//${window.location.host}`;
+      this.ws = io(serverUrl, {
+        path: '/ws',
+        auth: { token: localStorage.getItem('token') || '' },
+        transports: ['websocket', 'polling'],
+      });
 
-      this.ws.onopen = () => {
+      this.ws.on('connect', () => {
         console.log('[WS] Connected');
         this.wsReconnectAttempts = 0;
         this.sendWS('register-client', clientId);
         resolve();
-      };
+      });
 
-      this.ws.onmessage = (event) => {
-        try {
-          const message: WebSocketMessage = JSON.parse(event.data);
-          this.handleWSMessage(message);
-        } catch (e) {
-          console.error('[WS] Failed to parse message:', e);
-        }
-      };
+      this.ws.onAny((type, data) => {
+        this.handleWSMessage({ type, payload: data });
+      });
 
-      this.ws.onclose = () => {
-        console.log('[WS] Disconnected');
-        this.attemptReconnect();
-      };
-
-      this.ws.onerror = (error) => {
-        console.error('[WS] Error:', error);
+      this.ws.on('connect_error', (error) => {
+        console.error('[WS] Connection error:', error);
         if (this.wsReconnectAttempts === 0) {
           reject(error);
         }
-      };
+      });
+
+      this.ws.on('disconnect', (reason) => {
+        console.log('[WS] Disconnected:', reason);
+        this.attemptReconnect();
+      });
     });
   }
 
@@ -429,18 +429,18 @@ class ApiClient {
     }, delay);
   }
 
-  private handleWSMessage(message: WebSocketMessage) {
-    const handlers = this.eventHandlers.get(message.event);
+  private handleWSMessage(message: { type: string; payload: any }) {
+    const handlers = this.eventHandlers.get(message.type);
     if (handlers) {
-      handlers.forEach((handler) => handler(message.data));
+      handlers.forEach((handler) => handler(message.payload));
     }
   }
 
   sendWS(event: string, data: any) {
-    if (this.ws?.readyState === WebSocket.OPEN) {
-      this.ws.send(JSON.stringify({ event, data }));
+    if (this.ws && this.ws.connected) {
+      this.ws.emit(event, data);
     } else {
-      console.warn('[WS] Cannot send, socket not open');
+      console.warn('[WS] Cannot send, socket not connected');
     }
   }
 
@@ -457,7 +457,7 @@ class ApiClient {
 
   disconnectWebSocket() {
     if (this.ws) {
-      this.ws.close();
+      this.ws.disconnect();
       this.ws = null;
     }
     this.eventHandlers.clear();
