@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Clock, Train, MapPin, AlertTriangle, Volume2 } from 'lucide-react';
+import { Train, MapPin, AlertTriangle, Volume2 } from 'lucide-react';
 import { api } from '../../lib/api';
 import type { ActiveSession } from '../../lib/types';
 import { formatTime } from '../../lib/utils';
@@ -163,7 +163,7 @@ export function PassengerPIS() {
 
           <div className="flex-1 flex items-center justify-center">
             <div className="grid grid-cols-3 gap-4 max-w-2xl w-full">
-              <button onClick={announceNextStop} disabled={speaking || !nextStop} className="btn-primary h-20 flex flex-col items-center gap-2">
+              <button onClick={announceNextStop} disabled={speaking || !!nextStop} className="btn-primary h-20 flex flex-col items-center gap-2">
                 <MapPin className="w-8 h-8" />
                 <span className="text-sm">Next Stop</span>
                 <span className="text-xs text-rail-textDim">{nextStop?.station?.name || 'N/A'}</span>

@@ -22,7 +22,7 @@ export function DispatcherDashboard() {
     };
     loadFleet();
 
-    const unsub = api.onWSMessage<any>('fleet-update', (data) => {
+    const unsub = api.onWSMessage<any>('fleet-update', () => {
       loadFleet();
     });
 

@@ -11,7 +11,7 @@ interface SessionState {
   setDelay: (minutes: number) => void;
 }
 
-export const useSessionStore = create<SessionState>((set, get) => ({
+export const useSessionStore = create<SessionState>((set) => ({
   session: null,
   clientId: 'OBU-001', // In production, this would come from device registration
 

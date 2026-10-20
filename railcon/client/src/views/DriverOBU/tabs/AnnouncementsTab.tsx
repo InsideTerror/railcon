@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Volume2, MessageSquare, CheckCircle, Loader2 } from 'lucide-react';
+import { Volume2, CheckCircle } from 'lucide-react';
 import type { ActiveSession, CannedOption } from '../../../lib/types';
 import { api } from '../../../lib/api';
 

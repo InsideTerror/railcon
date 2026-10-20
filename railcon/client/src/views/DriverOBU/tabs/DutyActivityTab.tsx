@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, LogOut, Fuel, TrendingUp, Calendar, ChevronDown } from 'lucide-react';
+import { Fuel, TrendingUp, Calendar } from 'lucide-react';
 import type { ActiveSession } from '../../../lib/types';
 import { api } from '../../../lib/api';
 import { formatTime } from '../../../lib/utils';

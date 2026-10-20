@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Trash2, Plus, Clock, Send, UserX, MapPin } from 'lucide-react';
-import type { FleetData, ActiveSession } from '../../../lib/types';
+import type { FleetData } from '../../../lib/types';
 import { api } from '../../../lib/api';
 
 interface DispatcherControlsProps {

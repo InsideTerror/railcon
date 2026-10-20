@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Bell, X, Check, MessageSquare, AlertTriangle } from 'lucide-react';
+import { Bell, Check, MessageSquare } from 'lucide-react';
 import type { ActiveSession, Message } from '../../../lib/types';
 import { api } from '../../../lib/api';
 import { formatTime } from '../../../lib/utils';
@@ -65,7 +65,7 @@ export function InboxTab({ session, onUnreadChange }: InboxTabProps) {
     }
   };
 
-  const handleDismiss = async (messageId: string) => {
+  const _handleDismiss = async (messageId: string) => {
     await handleAcknowledge(messageId);
   };
 
