@@ -1,0 +1,139 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  pinHash   String
+  forteId   String   @unique
+  name      String
+  role      Role     @default(DRIVER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  sessions  ActiveSession[]
+  sentMessages Message[] @relation("SentMessages")
+}
+
+enum Role {
+  DRIVER
+  DISPATCHER
+  SYSADMIN
+}
+
+model Route {
+  id          String   @id
+  name        String
+  description String?
+  stops       RouteStop[]
+  timetables  Timetable[]
+}
+
+model Station {
+  id        String   @id @default(cuid())
+  name      String
+  code      String   @unique
+  routeStops RouteStop[]
+  timetableStops TimetableStop[]
+}
+
+model RouteStop {
+  routeId           String
+  stationId         String
+  stopSequenceIndex Int
+
+  route   Route   @relation(fields: [routeId], references: [id], onDelete: Cascade)
+  station Station @relation(fields: [stationId], references: [id], onDelete: Cascade)
+
+  @@id([routeId, stationId])
+  @@index([stopSequenceIndex])
+}
+
+model Timetable {
+  id          String   @id @default(cuid())
+  routeId     String
+  runNumber   String
+  startTime   DateTime
+  endTime     DateTime
+  direction   Int      // 1 or 2
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  route       Route           @relation(fields: [routeId], references: [id], onDelete: Cascade)
+  stops       TimetableStop[]
+  sessions    ActiveSession[]
+}
+
+model TimetableStop {
+  id                 String   @id @default(cuid())
+  timetableId        String
+  stationId          String
+  stopSequenceIndex  Int
+  scheduledArrival   DateTime?
+  scheduledDeparture DateTime?
+
+  timetable Timetable @relation(fields: [timetableId], references: [id], onDelete: Cascade)
+  station   Station   @relation(fields: [stationId], references: [id], onDelete: Cascade)
+
+  @@unique([timetableId, stopSequenceIndex])
+  @@index([stationId])
+}
+
+model ActiveSession {
+  id               String       @id @default(cuid())
+  clientId         String       @unique
+  driverId         String?
+  timetableId      String?
+  currentStopIndex Int          @default(0)
+  delayMinutes     Int          @default(0)
+  status           SessionStatus @default(NON_ACTIVE)
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  driver     User?      @relation(fields: [driverId], references: [id], onDelete: SetNull)
+  timetable  Timetable? @relation(fields: [timetableId], references: [id], onDelete: SetNull)
+  messages   Message[]  @relation("ReceivedMessages")
+}
+
+enum SessionStatus {
+  ACTIVE
+  IDLE
+  NON_ACTIVE
+}
+
+model Message {
+  id                   String        @id @default(cuid())
+  senderId             String?
+  receiverClientId     String
+  content              String
+  type                 MessageType
+  timestamp            DateTime      @default(now())
+  acknowledged         Boolean       @default(false)
+
+  sender       User?          @relation("SentMessages", fields: [senderId], references: [id], onDelete: SetNull)
+  receiver     ActiveSession  @relation("ReceivedMessages", fields: [receiverClientId], references: [clientId], onDelete: Cascade)
+}
+
+enum MessageType {
+  STATUS
+  DISPATCH_POPUP
+  PANIC
+}
+
+model CannedOption {
+  id            String           @id @default(cuid())
+  category      CannedCategory
+  label         String
+  templateText  String
+  displayOrder  Int
+}
+
+enum CannedCategory {
+  DRIVER_TO_DISPATCH
+  PASSENGER_ANNOUNCEMENT
+}
