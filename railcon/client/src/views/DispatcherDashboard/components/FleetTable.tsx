@@ -1,4 +1,4 @@
-import { MapPin, Clock, User, AlertTriangle, TrendingUp, Radio } from 'lucide-react';
+import { MapPin, User, Radio } from 'lucide-react';
 import type { ActiveSession } from '../../../lib/types';
 import { formatTime } from '../../../lib/utils';
 
