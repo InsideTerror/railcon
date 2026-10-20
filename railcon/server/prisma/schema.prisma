@@ -9,15 +9,17 @@ datasource db {
 
 model User {
   id        String   @id @default(cuid())
-  pinHash   String
-  forteId   String   @unique
+  pinHash   String   @map("pin_hash")
+  forteId   String   @unique @map("forte_id")
   name      String
   role      Role     @default(DRIVER)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
-  sessions  ActiveSession[]
-  sentMessages Message[] @relation("SentMessages")
+  sessions      ActiveSession[]
+  sentMessages  Message[] @relation("SentMessages")
+
+  @@map("users")
 }
 
 enum Role {
@@ -32,72 +34,82 @@ model Route {
   description String?
   stops       RouteStop[]
   timetables  Timetable[]
+
+  @@map("routes")
 }
 
 model Station {
-  id        String   @id @default(cuid())
-  name      String
-  code      String   @unique
-  routeStops RouteStop[]
+  id            String   @id @default(cuid())
+  name          String
+  code          String   @unique
+  routeStops    RouteStop[]
   timetableStops TimetableStop[]
+
+  @@map("stations")
 }
 
 model RouteStop {
   routeId           String
   stationId         String
-  stopSequenceIndex Int
+  stopSequenceIndex Int    @map("stop_sequence_index")
 
   route   Route   @relation(fields: [routeId], references: [id], onDelete: Cascade)
   station Station @relation(fields: [stationId], references: [id], onDelete: Cascade)
 
   @@id([routeId, stationId])
   @@index([stopSequenceIndex])
+  @@map("route_stops")
 }
 
 model Timetable {
   id          String   @id @default(cuid())
-  routeId     String
-  runNumber   String
-  startTime   DateTime
-  endTime     DateTime
+  routeId     String   @map("route_id")
+  runNumber   String   @map("run_number")
+  startTime   DateTime @map("start_time")
+  endTime     DateTime @map("end_time")
   direction   Int      // 1 or 2
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
 
-  route       Route           @relation(fields: [routeId], references: [id], onDelete: Cascade)
+  route       Route             @relation(fields: [routeId], references: [id], onDelete: Cascade)
   stops       TimetableStop[]
   sessions    ActiveSession[]
+
+  @@map("timetables")
 }
 
 model TimetableStop {
   id                 String   @id @default(cuid())
-  timetableId        String
-  stationId          String
-  stopSequenceIndex  Int
-  scheduledArrival   DateTime?
-  scheduledDeparture DateTime?
+  timetableId        String   @map("timetable_id")
+  stationId          String   @map("station_id")
+  stopSequenceIndex  Int      @map("stop_sequence_index")
+  scheduledArrival   DateTime? @map("scheduled_arrival")
+  scheduledDeparture DateTime? @map("scheduled_departure")
 
   timetable Timetable @relation(fields: [timetableId], references: [id], onDelete: Cascade)
   station   Station   @relation(fields: [stationId], references: [id], onDelete: Cascade)
 
   @@unique([timetableId, stopSequenceIndex])
   @@index([stationId])
+  @@map("timetable_stops")
 }
 
 model ActiveSession {
   id               String       @id @default(cuid())
-  clientId         String       @unique
-  driverId         String?
-  timetableId      String?
-  currentStopIndex Int          @default(0)
-  delayMinutes     Int          @default(0)
+  clientId         String       @unique @map("client_id")
+  driverId         String?      @map("driver_id")
+  timetableId      String?      @map("timetable_id")
+  currentStopIndex Int          @default(0) @map("current_stop_index")
+  delayMinutes     Int          @default(0) @map("delay_minutes")
   status           SessionStatus @default(NON_ACTIVE)
-  createdAt        DateTime     @default(now())
-  updatedAt        DateTime     @updatedAt
+  createdAt        DateTime     @default(now()) @map("created_at")
+  updatedAt        DateTime     @updatedAt @map("updated_at")
 
   driver     User?      @relation(fields: [driverId], references: [id], onDelete: SetNull)
   timetable  Timetable? @relation(fields: [timetableId], references: [id], onDelete: SetNull)
   messages   Message[]  @relation("ReceivedMessages")
+
+  @@map("active_sessions")
 }
 
 enum SessionStatus {
@@ -108,8 +120,8 @@ enum SessionStatus {
 
 model Message {
   id                   String        @id @default(cuid())
-  senderId             String?
-  receiverClientId     String
+  senderId             String?       @map("sender_id")
+  receiverClientId     String        @map("receiver_client_id")
   content              String
   type                 MessageType
   timestamp            DateTime      @default(now())
@@ -117,6 +129,9 @@ model Message {
 
   sender       User?          @relation("SentMessages", fields: [senderId], references: [id], onDelete: SetNull)
   receiver     ActiveSession  @relation("ReceivedMessages", fields: [receiverClientId], references: [clientId], onDelete: Cascade)
+
+  @@index([receiverClientId])
+  @@map("messages")
 }
 
 enum MessageType {
@@ -129,8 +144,10 @@ model CannedOption {
   id            String           @id @default(cuid())
   category      CannedCategory
   label         String
-  templateText  String
-  displayOrder  Int
+  templateText  String           @map("template_text")
+  displayOrder  Int              @map("display_order")
+
+  @@map("canned_options")
 }
 
 enum CannedCategory {
