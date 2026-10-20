@@ -1,0 +1,9 @@
+
+### Services
+- **API Server**: http://localhost:3000
+- **WebSocket**: ws://localhost:3000/ws
+- **PIS Display**: http://localhost:8080/passenger-display?clientId=OBU-001
+- **Health Check**: http://localhost:3000/health
+
+## Project Structure
+
