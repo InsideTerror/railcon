@@ -1,4 +1,4 @@
-import { X, LogOut, Route, User } from 'lucide-react';
+import { X, LogOut, Route, User, AlertTriangle } from 'lucide-react';
 import type { ActiveSession } from '../../../lib/types';
 
 interface LogoutModalProps {

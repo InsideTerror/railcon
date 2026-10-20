@@ -3,10 +3,10 @@ import { AlertTriangle, DoorOpen, DoorClosed, Zap, CheckCircle } from 'lucide-re
 import { api } from '../../../lib/api';
 
 interface BottomActionStripProps {
-  _session: any;
+  session: any;
 }
 
-export function BottomActionStrip({ _session }: BottomActionStripProps) {
+export function BottomActionStrip({ session }: BottomActionStripProps) {
   const [doorOpen, setDoorOpen] = useState(false);
   const [panicPressed, setPanicPressed] = useState(false);
   const [panicConfirm, setPanicConfirm] = useState(false);

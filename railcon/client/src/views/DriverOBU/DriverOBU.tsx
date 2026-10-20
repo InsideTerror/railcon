@@ -40,24 +40,24 @@ export function DriverOBU() {
     });
 
     const unsubStop = api.onWSMessage<{ stopIndex: number }>('stop-advanced', (data) => {
-      setSession((prev: ActiveSession | null) => prev ? { ...prev, currentStopIndex: data.stopIndex } : null);
+      if (session) setSession({ ...session, currentStopIndex: data.stopIndex });
     });
 
     const unsubDoor = api.onWSMessage<{ doorOpen: boolean }>('door-state-changed', (data) => {
-      setSession((prev: ActiveSession | null) => prev ? { ...prev, doorOpen: data.doorOpen } : null);
+      if (session) setSession({ ...session, doorOpen: data.doorOpen });
     });
 
     const unsubSchedule = api.onWSMessage<{ delayMinutes: number }>('schedule-override', (data) => {
-      setSession((prev: ActiveSession | null) => prev ? { ...prev, delayMinutes: data.delayMinutes } : null);
+      if (session) setSession({ ...session, delayMinutes: data.delayMinutes });
     });
 
     const unsubTruncate = api.onWSMessage<{ newStopIndex: number }>('stops-truncated', (data) => {
-      setSession((prev: ActiveSession | null) => prev ? { ...prev, currentStopIndex: data.newStopIndex } : null);
+      if (session) setSession({ ...session, currentStopIndex: data.newStopIndex });
     });
 
     const unsubTerminate = api.onWSMessage<{ clientId: string }>('session-terminated', (data) => {
-      if (data.clientId === clientId) {
-        setSession((prev: ActiveSession | null) => prev ? { ...prev, status: 'NON_ACTIVE', driverId: undefined, timetableId: undefined, currentStopIndex: 0, delayMinutes: 0 } : null);
+      if (data.clientId === clientId && session) {
+        setSession({ ...session, status: 'NON_ACTIVE', driverId: undefined, timetableId: undefined, currentStopIndex: 0, delayMinutes: 0 });
       }
     });
 

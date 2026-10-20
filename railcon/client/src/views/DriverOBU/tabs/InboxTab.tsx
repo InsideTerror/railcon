@@ -65,10 +65,6 @@ export function InboxTab({ session, onUnreadChange }: InboxTabProps) {
     }
   };
 
-  const _handleDismiss = async (messageId: string) => {
-    await handleAcknowledge(messageId);
-  };
-
   if (loading) {
     return (
       <div className="flex items-center justify-center h-full">
