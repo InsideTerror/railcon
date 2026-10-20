@@ -5,7 +5,7 @@ interface SessionState {
   session: ActiveSession | null;
   clientId: string;
   setSession: (session: ActiveSession | null) => void;
-  registerClient: (clientId: string, driverId?: string, timetableId?: string) => void;
+  registerClient: (clientId: string, driverId?: string | null, timetableId?: string | null) => void;
   updateSession: (updates: Partial<ActiveSession>) => void;
   advanceStop: () => void;
   setDelay: (minutes: number) => void;
@@ -20,7 +20,7 @@ export const useSessionStore = create<SessionState>((set, get) => ({
   registerClient: (clientId, driverId, timetableId) => {
     set((state) => ({
       clientId,
-      session: state.session ? { ...state.session, clientId, driverId, timetableId } : null,
+      session: state.session ? { ...state.session, clientId, driverId: driverId ?? null, timetableId: timetableId ?? null } : null,
     }));
   },
 

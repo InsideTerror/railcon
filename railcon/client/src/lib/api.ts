@@ -25,12 +25,11 @@ import type {
   CSVImportRequest,
   HealthResponse,
   ApiError,
-  WebSocketEvent,
   WebSocketMessage,
 } from './types';
 
-const API_BASE = import.meta.env.VITE_API_BASE || '/api';
-const WS_BASE = import.meta.env.VITE_WS_BASE || '/ws';
+const API_BASE = (import.meta as any).env?.VITE_API_BASE || '/api';
+const WS_BASE = (import.meta as any).env?.VITE_WS_BASE || '/ws';
 
 class ApiClient {
   private token: string | null = null;

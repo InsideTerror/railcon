@@ -25,7 +25,7 @@ function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route
-          path="/driver/*"
+          path="/driver"
           element={
             <PrivateRoute allowedRoles={['DRIVER']}>
               <DriverOBU />
@@ -33,7 +33,7 @@ function App() {
           }
         />
         <Route
-          path="/dispatcher/*"
+          path="/dispatcher"
           element={
             <PrivateRoute allowedRoles={['DISPATCHER', 'SYSADMIN']}>
               <DispatcherDashboard />

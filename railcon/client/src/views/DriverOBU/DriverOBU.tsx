@@ -27,7 +27,7 @@ export function DriverOBU() {
         
         const { session: registeredSession } = await api.registerClient({
           clientId,
-          driverId: user?.id,
+          driverId: user?.id ?? null,
         });
         setSession(registeredSession);
       } catch (err) {

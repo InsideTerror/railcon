@@ -4,6 +4,7 @@ import { DispatcherControls } from './components/DispatcherControls';
 import { useAuthStore } from '../../stores/authStore';
 import { api } from '../../lib/api';
 import type { FleetData } from '../../lib/types';
+import { Radio } from 'lucide-react';
 
 export function DispatcherDashboard() {
   const { user } = useAuthStore();
