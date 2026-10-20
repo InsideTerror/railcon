@@ -1,10 +1,9 @@
 import { useState } from 'react';
 import { AlertTriangle, DoorOpen, DoorClosed, Zap, CheckCircle } from 'lucide-react';
-import type { ActiveSession } from '../../../lib/types';
 import { api } from '../../../lib/api';
 
 interface BottomActionStripProps {
-  session: ActiveSession;
+  session: any;
 }
 
 export function BottomActionStrip({ session }: BottomActionStripProps) {

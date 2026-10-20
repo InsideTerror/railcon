@@ -9,7 +9,6 @@ import { Radio } from 'lucide-react';
 export function DispatcherDashboard() {
   const { user } = useAuthStore();
   const [fleet, setFleet] = useState<FleetData>({ active: [], idle: [], nonActive: [], total: 0 });
-  const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'active' | 'idle' | 'nonActive'>('active');
 
   useEffect(() => {
@@ -19,8 +18,6 @@ export function DispatcherDashboard() {
         setFleet(data);
       } catch (err) {
         console.error('Failed to load fleet:', err);
-      } finally {
-        setLoading(false);
       }
     };
     loadFleet();

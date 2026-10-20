@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
-import { MapPin, Clock, CheckCircle, AlertCircle, XCircle, ChevronRight } from 'lucide-react';
-import type { ActiveSession, TimetableStop } from '../../../lib/types';
-import { formatTime, getStopStatus, getDelayBadge } from '../../../lib/utils';
+import { MapPin, Clock, CheckCircle, AlertCircle, ChevronRight } from 'lucide-react';
+import type { ActiveSession } from '../../../lib/types';
+import { formatTime } from '../../../lib/utils';
 
 interface StopSequencePanelProps {
   session: ActiveSession;

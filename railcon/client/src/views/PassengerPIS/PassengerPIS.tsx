@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Clock, Train, MapPin } from 'lucide-react';
+import { Clock, Train, MapPin, AlertTriangle, Volume2 } from 'lucide-react';
 import { api } from '../../lib/api';
 import type { ActiveSession } from '../../lib/types';
 import { formatTime } from '../../lib/utils';

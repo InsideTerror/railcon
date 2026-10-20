@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { Outlet } from 'react-router-dom';
 import { Header } from './components/Header';
 import { StopSequencePanel } from './components/StopSequencePanel';
 import { NavigationTabs } from './components/NavigationTabs';
@@ -12,9 +11,8 @@ import type { ActiveSession } from '../../lib/types';
 
 export function DriverOBU() {
   const { user } = useAuthStore();
-  const { session, setSession, registerClient, clientId } = useSessionStore();
+  const { session, setSession, clientId } = useSessionStore();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
-  const [logoutType, setLogoutType] = useState<'driver' | 'route' | 'both'>('driver');
   const [wsConnected, setWsConnected] = useState(false);
 
   useEffect(() => {
@@ -27,7 +25,7 @@ export function DriverOBU() {
         
         const { session: registeredSession } = await api.registerClient({
           clientId,
-          driverId: user?.id ?? null,
+          driverId: user?.id ?? undefined,
         });
         setSession(registeredSession);
       } catch (err) {
@@ -59,7 +57,7 @@ export function DriverOBU() {
 
     const unsubTerminate = api.onWSMessage<{ clientId: string }>('session-terminated', (data) => {
       if (data.clientId === clientId) {
-        setSession((prev) => prev ? { ...prev, status: 'NON_ACTIVE', driverId: null, timetableId: null, currentStopIndex: 0, delayMinutes: 0 } : null);
+        setSession((prev) => prev ? { ...prev, status: 'NON_ACTIVE', driverId: undefined, timetableId: undefined, currentStopIndex: 0, delayMinutes: 0 } : null);
       }
     });
 
@@ -79,10 +77,10 @@ export function DriverOBU() {
     
     try {
       if (type === 'driver' || type === 'both') {
-        await api.updateSession(session.clientId, { driverId: null, status: 'IDLE' });
+        await api.updateSession(session.clientId, { driverId: undefined, status: 'IDLE' });
       }
       if (type === 'route' || type === 'both') {
-        await api.updateSession(session.clientId, { timetableId: null, currentStopIndex: 0, delayMinutes: 0 });
+        await api.updateSession(session.clientId, { timetableId: undefined, currentStopIndex: 0, delayMinutes: 0 });
       }
       setShowLogoutModal(false);
     } catch (err) {

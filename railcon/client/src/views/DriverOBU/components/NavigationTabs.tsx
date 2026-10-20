@@ -19,7 +19,7 @@ const TABS = [
 ] as const;
 
 export function NavigationTabs({ session }: NavigationTabsProps) {
-  const [activeTab, setActiveTab] = useState<TABS[number]['id']>('duty');
+  const [activeTab, setActiveTab] = useState<typeof TABS[number]['id']>('duty');
   const [unreadCount, setUnreadCount] = useState(0);
 
   const renderTabContent = () => {
