@@ -1,0 +1,15 @@
+services:
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: core
+      POSTGRES_PASSWORD: core_dev_password
+      POSTGRES_DB: core
+    ports:
+      - "5432:5432"
+    volumes:
+      - core_pg:/var/lib/postgresql/data
+
+volumes:
+  core_pg:

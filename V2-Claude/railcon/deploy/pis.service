@@ -1,0 +1,14 @@
+[Unit]
+Description=C.O.R.E. PIS sub-server (standalone, optional)
+After=network.target
+
+[Service]
+Type=simple
+User=core
+WorkingDirectory=/opt/core/client
+Environment=PIS_PORT=8080
+ExecStart=/usr/bin/node pis/pis-server.cjs
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

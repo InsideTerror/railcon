@@ -1,0 +1,20 @@
+# Cloudflare Tunnel config (Debian host).
+#
+#   cloudflared tunnel login
+#   cloudflared tunnel create core-rail
+#   cloudflared tunnel route dns core-rail railcon.corerail.dpdns.org
+#   cloudflared tunnel route dns core-rail dash.corerail.dpdns.org
+#   cloudflared tunnel run core-rail
+#
+# Replace <TUNNEL-UUID> and the credentials path with the values printed by `tunnel create`.
+tunnel: <TUNNEL-UUID>
+credentials-file: /etc/cloudflared/<TUNNEL-UUID>.json
+
+ingress:
+  # Telemetry + WebSocket server (OBUs connect to wss://railcon.corerail.dpdns.org/ws/obu)
+  - hostname: railcon.corerail.dpdns.org
+    service: http://localhost:3000
+  # Dispatcher dashboard + sysadmin portal (same Fastify process serves the built client)
+  - hostname: dash.corerail.dpdns.org
+    service: http://localhost:3000
+  - service: http_status:404

@@ -1,0 +1,181 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  DRIVER
+  DISPATCHER
+  SYSADMIN
+}
+
+enum MessageType {
+  STATUS
+  DISPATCH_POPUP
+  PANIC
+}
+
+enum CannedCategory {
+  DRIVER_TO_DISPATCH
+  PASSENGER_ANNOUNCEMENT
+}
+
+enum SessionStatus {
+  ACTIVE
+  IDLE
+  NON_ACTIVE
+}
+
+/// Drivers, dispatchers and system administrators.
+model User {
+  id        Int      @id @default(autoincrement())
+  pinHash   String   @map("pin_hash") // bcrypt of a 6-8 digit PIN
+  forteId   String   @unique @map("forte_id") // the id typed on the OBU, e.g. "856"
+  name      String
+  role      Role     @default(DRIVER)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  sessions     ActiveSession[]
+  sentMessages Message[]       @relation("MessageSender")
+
+  @@map("users")
+}
+
+model Route {
+  id          String @id // e.g. "S70"
+  name        String
+  description String @default("")
+
+  stops      RouteStop[]
+  timetables Timetable[]
+
+  @@map("routes")
+}
+
+model Station {
+  id   Int     @id @default(autoincrement())
+  name String
+  code String  @unique
+  lat  Float? // optional, used for the OBU geofence
+  lon  Float?
+
+  routeStops     RouteStop[]
+  timetableStops TimetableStop[]
+
+  @@map("stations")
+}
+
+model RouteStop {
+  routeId           String  @map("route_id")
+  stationId         Int     @map("station_id")
+  stopSequenceIndex Int     @map("stop_sequence_index") // 1..N
+
+  route   Route   @relation(fields: [routeId], references: [id], onDelete: Cascade)
+  station Station @relation(fields: [stationId], references: [id], onDelete: Cascade)
+
+  @@id([routeId, stopSequenceIndex])
+  @@index([stationId])
+  @@map("route_stops")
+}
+
+model Timetable {
+  id        Int    @id @default(autoincrement())
+  routeId   String @map("route_id")
+  runNumber String @map("run_number") // "0001"
+  startTime Int    @map("start_time") // seconds after service-day midnight
+  endTime   Int    @map("end_time")
+  direction Int    @default(1) // 1 or 2
+  isRelief  Boolean @default(false) @map("is_relief")
+
+  route    Route           @relation(fields: [routeId], references: [id], onDelete: Cascade)
+  stops    TimetableStop[]
+  sessions ActiveSession[]
+
+  @@unique([routeId, runNumber])
+  @@map("timetables")
+}
+
+model TimetableStop {
+  timetableId       Int @map("timetable_id")
+  stationId         Int @map("station_id")
+  stopSequenceIndex Int @map("stop_sequence_index")
+  scheduledArrival   Int @map("scheduled_arrival") // seconds after service-day midnight
+  scheduledDeparture Int @map("scheduled_departure")
+
+  timetable Timetable @relation(fields: [timetableId], references: [id], onDelete: Cascade)
+  station   Station   @relation(fields: [stationId], references: [id], onDelete: Cascade)
+
+  @@id([timetableId, stopSequenceIndex])
+  @@index([stationId])
+  @@map("timetable_stops")
+}
+
+/// One row per client device (OBU). Survives server restarts and GSM drop-outs.
+model ActiveSession {
+  clientId          String        @id @map("client_id")
+  deviceName        String        @default("") @map("device_name")
+  driverId          Int?          @map("driver_id")
+  timetableId       Int?          @map("timetable_id")
+  currentStopIndex  Int           @default(1) @map("current_stop_index")
+  delayMinutes      Int           @default(0) @map("delay_minutes")
+  status            SessionStatus @default(NON_ACTIVE)
+
+  // Extensions used by the live engine
+  phase             String   @default("RUNNING") // RUNNING | AT_STOP
+  doorsOpen         Boolean  @default(false) @map("doors_open")
+  truncatedAtIndex  Int?     @map("truncated_at_index") // last stop that is still served
+  scheduleShiftSec  Int      @default(0) @map("schedule_shift_sec")
+  stopOffsets       Json     @default("{}") @map("stop_offsets") // {"3": -1, "4": 2} minutes
+  earlyDeparture    Boolean  @default(false) @map("early_departure")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  driver    User?      @relation(fields: [driverId], references: [id], onDelete: SetNull)
+  timetable Timetable? @relation(fields: [timetableId], references: [id], onDelete: SetNull)
+
+  @@map("active_sessions")
+}
+
+model Message {
+  id               Int         @id @default(autoincrement())
+  senderId         Int?        @map("sender_id") // user id, null = system
+  senderClientId   String?     @map("sender_client_id")
+  receiverClientId String?     @map("receiver_client_id") // null = dispatch centre
+  content          String
+  type             MessageType
+  timestamp        DateTime    @default(now())
+  acknowledged     Boolean     @default(false)
+
+  sender User? @relation("MessageSender", fields: [senderId], references: [id], onDelete: SetNull)
+
+  @@index([receiverClientId, acknowledged])
+  @@index([timestamp])
+  @@map("messages")
+}
+
+model CannedOption {
+  id           Int            @id @default(autoincrement())
+  category     CannedCategory
+  label        String
+  templateText String         @map("template_text")
+  displayOrder Int            @default(0) @map("display_order")
+
+  @@unique([category, label])
+  @@map("canned_options")
+}
+
+/// Fuel / mileage entries from the Duty tab.
+model DutyLog {
+  id        Int      @id @default(autoincrement())
+  clientId  String   @map("client_id")
+  driverId  Int?     @map("driver_id")
+  fuelLiters Float?  @map("fuel_liters")
+  mileageKm Float?   @map("mileage_km")
+  note      String   @default("")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("duty_logs")
+}
